@@ -35,4 +35,5 @@ thiserror = "1.0.64"
 anyhow = "1.0.89"
 sled = "0.34.7"
 tokio = "1.45.0"
+actix-cors = "0.7.1"
 

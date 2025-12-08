@@ -3,7 +3,7 @@ extern crate core;
 use std::env;
 use std::str::FromStr;
 use std::sync::Arc;
-use actix_web::{rt, get, web, App, HttpServer, Responder, post, HttpResponse};
+use actix_web::{rt, get, web, App, HttpServer, Responder, post, HttpResponse, http};
 use actix_web::web::{Data, resource, route, service, ServiceConfig};
 
 use log::{debug, error, info, LevelFilter};
@@ -33,6 +33,7 @@ mod utils;
 
 
 use std::thread;
+use actix_cors::Cors;
 use actix_web::dev::Server;
 use bigdecimal::BigDecimal;
 use dotenv::dotenv;
@@ -83,7 +84,19 @@ async fn main()-> std::io::Result<()>  {
     let port: u16 = APP_CONFIG.port.to_owned();
     let address = ("0.0.0.0", port);
     HttpServer::new(move|| {
+        let cors = Cors::default()
+            .allowed_origin("http://localhost:5173")
+            .allowed_methods(vec!["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+            .allowed_headers(vec![
+                http::header::AUTHORIZATION,
+                http::header::ACCEPT,
+                http::header::CONTENT_TYPE,
+                http::header::HeaderName::from_static("x-requested-with"),
+            ])
+            .supports_credentials()
+            .max_age(3600);
         App::new()
+            .wrap(cors)
             .app_data(Data::new(db.clone()))
             .configure(configure_services)
     })
